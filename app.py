@@ -218,6 +218,10 @@ def read_data():
     except Exception as e:
         error_subject = "Python 脚本错误"
         error_message = f"脚本发生错误:\n\n{str(e)}"
+
+@app.route('/helloworld', methods=['GET'])
+def hello():  
+    return "hello"
     
 if __name__ == '__main__':
     app.run(debug=True)
