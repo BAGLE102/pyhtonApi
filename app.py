@@ -8,7 +8,7 @@ import requests
 app = Flask(__name__)
 
 conn_params = {
-    'server': '210.240.202.114',
+    'server': '210.240.202.114:1443',
     'database': 'Trash',
     'username': 'sa',
     'password': 'ji3ao6u.3au/6y4',
@@ -229,7 +229,7 @@ def read_data():
 
 @app.route('/helloworld', methods=['GET'])
 def hello():  
-    return "bb"
+    return "cc"
     
 if __name__ == '__main__':
     app.run(debug=True)
