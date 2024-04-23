@@ -7,44 +7,66 @@ from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
 import requests
 app = Flask(__name__)
 
-conn_params = {
-    'server': '210.240.202.114:1443',
-    'database': 'Trash',
-    'username': 'sa',
-    'password': 'ji3ao6u.3au/6y4',
-}
+# 数据库连接字符串
+def get_conn_str():
+    param = {
+        'uid': "sa",
+        'pwd': "ji3ao6u.3au/6y4",
+        'srv': "210.240.202.114",
+        'pno': 1443,
+        'db': 'Trash',  
+    }
 
-# 連接資料庫
+    return f"mssql+pyodbc://{param['uid']}:{param['pwd']}@{param['srv']}:{param['pno']}/{param['db']}?driver=ODBC Driver 17 for SQL Server"
+
+# 连接数据库
 def connect_to_database():
     try:
-        param = {
-            'drv': "ODBC Driver 17 for SQL Server",
-            'uid': "sa",
-            'pwd': "ji3ao6u.3au/6y4",
-            'srv': "210.240.202.114",  # IP
-            'ins': "",
-            'pno': 1443,
-            'db': 'Trash',  
-            'table': 'test'   
-        }
-
-        conn_str = f"DRIVER={param['drv']};SERVER={param['srv']};DATABASE={param['db']};UID={param['uid']};PWD={param['pwd']}"
-        conn = pyodbc.connect(conn_str)
-        return conn
-
+        engine = create_engine(get_conn_str())
+        return engine.connect()
     except Exception as e:
         print(f"An error occurred: {str(e)}")
         return None
 
-# 檢查User是否存在
 def check_user_exists(LineID):
     conn = connect_to_database()
-    cursor = conn.cursor()
-    cursor.execute("SELECT COUNT(*) FROM Users WHERE LineID=?", (LineID,))
-    row = cursor.fetchone()
-    count = row[0]
-    conn.close()
-    return count > 0
+    if conn:
+        metadata = MetaData()
+        users_table = Table('Users', metadata, autoload=True, autoload_with=conn)
+        query = users_table.select().where(users_table.c.LineID == LineID)
+        result = conn.execute(query).fetchone()
+        conn.close()
+        return result is not None
+    return False
+
+def get_user_data_from_database(user_id):
+    conn = connect_to_database()
+    if conn:
+        metadata = MetaData()
+        users_table = Table('Users', metadata, autoload=True, autoload_with=conn)
+        query = users_table.select().where(users_table.c.LineID == user_id)
+        result = conn.execute(query).fetchone()
+        conn.close()
+        if result:
+            return {
+                'user_id': result[0],
+                'display_name': result[1],
+                'picture_url': result[2]
+            }
+    return None
+
+def insert_user_to_database(user_profile):
+    conn = connect_to_database()
+    if conn:
+        metadata = MetaData()
+        users_table = Table('Users', metadata, autoload=True, autoload_with=conn)
+        query = users_table.insert().values(
+            UserName=user_profile['display_name'],
+            LineID=user_profile['user_id'],
+            PicUrl=user_profile['picture_url']
+        )
+        conn.execute(query)
+        conn.close()
 
 
 
@@ -120,28 +142,7 @@ def get_user_profile(access_token):
         print(f'Request Error: {e}')
         return {'error': 'Failed to send request'}
 
-def get_user_data_from_database(user_id):
 
-    conn = connect_to_database()
-    cursor = conn.cursor()
-    cursor.execute("SELECT UserName, LineID, PicUrl FROM Users WHERE LineID=?", (user_id,))
-    row = cursor.fetchone()
-    user_data = {
-        'user_id': row[0],
-        'display_name': row[1],
-        'picture_url': row[2]
-    }
-    conn.close()
-    return user_data
-
-def insert_user_to_database(user_profile):
-    # 将用户数据插入到数据库中的函数，根据您的实际情况填写插入语句和数据库连接信息
-    conn = connect_to_database()
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO Users (UserName, LineID, PicUrl) VALUES (?, ?, ?)",
-                   (user_profile['display_name'], user_profile['user_id'], user_profile['picture_url']))
-    conn.commit()
-    conn.close()
 
 
 @app.route('/insert_data', methods=['POST'])
@@ -229,7 +230,7 @@ def read_data():
 
 @app.route('/helloworld', methods=['GET'])
 def hello():  
-    return "cc"
+    return "ss"
     
 if __name__ == '__main__':
     app.run(debug=True)
