@@ -8,7 +8,7 @@ import requests
 app = Flask(__name__)
 
 conn_params = {
-    'server': '210.240.202.114:1443',
+    'server': '210.240.202.114',
     'database': 'Trash',
     'username': 'sa',
     'password': 'ji3ao6u.3au/6y4',
@@ -16,15 +16,25 @@ conn_params = {
 
 # 連接資料庫
 def connect_to_database():
-    conn_str = (
-        f"DRIVER=ODBC Driver 17 for SQL Server;"
-        f"SERVER={conn_params['server']};"
-        f"DATABASE={conn_params['database']};"
-        f"UID={conn_params['username']};"
-        f"PWD={conn_params['password']};"
-    )
-    conn = pyodbc.connect(conn_str)
-    return conn
+    try:
+        param = {
+            'drv': "ODBC Driver 17 for SQL Server",
+            'uid': "sa",
+            'pwd': "ji3ao6u.3au/6y4",
+            'srv': "210.240.202.114",  # IP
+            'ins': "",
+            'pno': 1443,
+            'db': 'Trash',  
+            'table': 'test'   
+        }
+
+        const_str = f"mssql+pyodbc://{param['uid']}:{param['pwd']}@{param['srv']}{param['ins']}:{param['pno']}/{param['db']}?driver={param['drv']}"
+        engine = create_engine(const_str, fast_executemany=True)
+        return engine
+
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+        return None
 
 # 檢查User是否存在
 def check_user_exists(LineID):
@@ -111,27 +121,32 @@ def get_user_profile(access_token):
         return {'error': 'Failed to send request'}
 
 def get_user_data_from_database(user_id):
-    # 从数据库中获取用户数据的函数，根据您的实际情况填写查询语句和数据库连接信息
     conn = connect_to_database()
     cursor = conn.cursor()
-    cursor.execute("SELECT UserName, LineID, PicUrl FROM Users WHERE LineID=?", (user_id,))
+    cursor.execute("SELECT LineID, UserName, PicUrl FROM Users WHERE LineID=?", (user_id,))
     row = cursor.fetchone()
-    user_data = {
-        'user_id': row[0],
-        'display_name': row[1],
-        'picture_url': row[2]
-    }
     conn.close()
-    return user_data
 
-def insert_user_to_database(user_profile):
-    # 将用户数据插入到数据库中的函数，根据您的实际情况填写插入语句和数据库连接信息
+    if row is not None:
+        user_data = {
+            'user_id': row[0],  # 用户的唯一标识符
+            'display_name': row[1],  # 用户的显示名称
+            'picture_url': row[2]  # 用户的图片 URL
+        }
+        return user_data
+    else:
+        return None
+
+
+def insert_user_to_database(user_profile, table_name='Users'):
+    # 将用户数据插入到指定表中的函数
     conn = connect_to_database()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO Users (UserName, LineID, PicUrl) VALUES (?, ?, ?)",
+    cursor.execute(f"INSERT INTO {table_name} (UserName, LineID, PicUrl) VALUES (?, ?, ?)",
                    (user_profile['display_name'], user_profile['user_id'], user_profile['picture_url']))
     conn.commit()
     conn.close()
+
 
 
 @app.route('/insert_data', methods=['POST'])
@@ -219,7 +234,7 @@ def read_data():
 
 @app.route('/helloworld', methods=['GET'])
 def hello():  
-    return "a"
+    return ""
     
 if __name__ == '__main__':
     app.run(debug=True)
