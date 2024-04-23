@@ -28,9 +28,9 @@ def connect_to_database():
             'table': 'test'   
         }
 
-        const_str = f"mssql+pyodbc://{param['uid']}:{param['pwd']}@{param['srv']}{param['ins']}:{param['pno']}/{param['db']}?driver={param['drv']}"
-        engine = create_engine(const_str, fast_executemany=True)
-        return engine
+        conn_str = f"DRIVER={param['drv']};SERVER={param['srv']};DATABASE={param['db']};UID={param['uid']};PWD={param['pwd']}"
+        conn = pyodbc.connect(conn_str)
+        return conn
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")
@@ -121,32 +121,27 @@ def get_user_profile(access_token):
         return {'error': 'Failed to send request'}
 
 def get_user_data_from_database(user_id):
+
     conn = connect_to_database()
     cursor = conn.cursor()
-    cursor.execute("SELECT LineID, UserName, PicUrl FROM Users WHERE LineID=?", (user_id,))
+    cursor.execute("SELECT UserName, LineID, PicUrl FROM Users WHERE LineID=?", (user_id,))
     row = cursor.fetchone()
+    user_data = {
+        'user_id': row[0],
+        'display_name': row[1],
+        'picture_url': row[2]
+    }
     conn.close()
+    return user_data
 
-    if row is not None:
-        user_data = {
-            'user_id': row[0],  # 用户的唯一标识符
-            'display_name': row[1],  # 用户的显示名称
-            'picture_url': row[2]  # 用户的图片 URL
-        }
-        return user_data
-    else:
-        return None
-
-
-def insert_user_to_database(user_profile, table_name='Users'):
-    # 将用户数据插入到指定表中的函数
+def insert_user_to_database(user_profile):
+    # 将用户数据插入到数据库中的函数，根据您的实际情况填写插入语句和数据库连接信息
     conn = connect_to_database()
     cursor = conn.cursor()
-    cursor.execute(f"INSERT INTO {table_name} (UserName, LineID, PicUrl) VALUES (?, ?, ?)",
+    cursor.execute("INSERT INTO Users (UserName, LineID, PicUrl) VALUES (?, ?, ?)",
                    (user_profile['display_name'], user_profile['user_id'], user_profile['picture_url']))
     conn.commit()
     conn.close()
-
 
 
 @app.route('/insert_data', methods=['POST'])
@@ -234,7 +229,7 @@ def read_data():
 
 @app.route('/helloworld', methods=['GET'])
 def hello():  
-    return "aa"
+    return "bb"
     
 if __name__ == '__main__':
     app.run(debug=True)
