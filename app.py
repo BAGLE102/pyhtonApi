@@ -27,54 +27,15 @@ def connect_to_database():
     return conn
 
 # 檢查User是否存在
-def check_user_exists(account):
+def check_user_exists(LineID):
     conn = connect_to_database()
     cursor = conn.cursor()
-    cursor.execute("SELECT COUNT(*) FROM Users WHERE Account=?", (account,))
+    cursor.execute("SELECT COUNT(*) FROM Users WHERE LineID=?", (LineID,))
     row = cursor.fetchone()
     count = row[0]
     conn.close()
     return count > 0
 
-# 檢查密碼是否存在
-def check_password_correct(account, password):
-    conn = connect_to_database()
-    cursor = conn.cursor()
-    cursor.execute("SELECT COUNT(*) FROM Users WHERE Account=? AND Password=?", (account, password))
-    row = cursor.fetchone()
-    count = row[0]
-    conn.close()
-    return count > 0
-
-# 獲取User資料
-def get_user_info(account):
-    conn = connect_to_database()
-    cursor = conn.cursor()
-    cursor.execute("SELECT Email, LineID FROM Users WHERE Account=?", (account,))
-    row = cursor.fetchone()
-    conn.close()
-    return row
-
-@app.route('/login', methods=['POST'])
-def login():
-    data = request.json
-    account = data.get('account')
-    password = data.get('password')
-
-    if not account or not password:
-        return jsonify({'error': 'Missing account or password'}), 400
-
-    if not check_user_exists(account):
-        return jsonify({'error': 'User does not exist'}), 404
-
-    if not check_password_correct(account, password):
-        return jsonify({'error': 'Incorrect password'}), 401
-
-    email, line_id = get_user_info(account)
-    if not email and not line_id:
-        return jsonify({'message': 'Please complete the authentication process'}), 403
-
-    return jsonify({'message': 'Login successful', 'email': email, 'line_id': line_id}), 200
 
 
 @app.route('/getCode', methods=['GET'])
@@ -100,8 +61,21 @@ def get_data():
         if response.status_code == 200:
             response_json = response.json()
             access_token = response_json.get('access_token')
-            # 直接返回 get_user_profile 
-            return jsonify(get_user_profile(access_token))
+            
+            # 获取用户的个人资料信息
+            user_profile = get_user_profile(access_token)
+            
+            # 检查用户是否存在于数据库中
+            if check_user_exists(user_profile['user_id']):
+                # 如果用户存在，则从数据库中获取用户数据
+                user_data = get_user_data_from_database(user_profile['user_id'])
+            else:
+                # 如果用户不存在，则将用户数据插入到数据库中
+                insert_user_to_database(user_profile)
+                user_data = user_profile
+
+            # 直接返回用户数据
+            return jsonify(user_data)
         else:
             print(f'Error: {response.status_code}, {response.text}')
             return jsonify({'error': 'Failed to get access token'}), 500
@@ -135,6 +109,30 @@ def get_user_profile(access_token):
     except requests.RequestException as e:
         print(f'Request Error: {e}')
         return {'error': 'Failed to send request'}
+
+def get_user_data_from_database(user_id):
+    # 从数据库中获取用户数据的函数，根据您的实际情况填写查询语句和数据库连接信息
+    conn = connect_to_database()
+    cursor = conn.cursor()
+    cursor.execute("SELECT UserName, LineID, PicUrl FROM Users WHERE LineID=?", (user_id,))
+    row = cursor.fetchone()
+    user_data = {
+        'user_id': row[0],
+        'display_name': row[1],
+        'picture_url': row[2]
+    }
+    conn.close()
+    return user_data
+
+def insert_user_to_database(user_profile):
+    # 将用户数据插入到数据库中的函数，根据您的实际情况填写插入语句和数据库连接信息
+    conn = connect_to_database()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO Users (UserName, LineID, PicUrl) VALUES (?, ?, ?)",
+                   (user_profile['display_name'], user_profile['user_id'], user_profile['picture_url']))
+    conn.commit()
+    conn.close()
+
 
 @app.route('/insert_data', methods=['POST'])
 def insert_data():
@@ -221,7 +219,7 @@ def read_data():
 
 @app.route('/helloworld', methods=['GET'])
 def hello():  
-    return "hello"
+    return ""
     
 if __name__ == '__main__':
     app.run(debug=True)
