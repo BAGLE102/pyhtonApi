@@ -4,6 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy import text
 import pandas as pd
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
+from sqlalchemy.exc import SQLAlchemyError
 import requests
 app = Flask(__name__)
 
@@ -55,18 +56,28 @@ def get_user_data_from_database(user_id):
             }
     return None
 
+
+
 def insert_user_to_database(user_profile):
     conn = connect_to_database()
     if conn:
-        metadata = MetaData()
-        users_table = Table('Users', metadata, autoload=True, autoload_with=conn)
-        query = users_table.insert().values(
-            UserName=user_profile['display_name'],
-            LineID=user_profile['user_id'],
-            PicUrl=user_profile['picture_url']
-        )
-        conn.execute(query)
-        conn.close()
+        try:
+            metadata = MetaData()
+            users_table = Table('Users', metadata, autoload=True, autoload_with=conn)
+            query = users_table.insert().values(
+                UserName=user_profile['display_name'],
+                LineID=user_profile['user_id'],
+                PicUrl=user_profile['picture_url']
+            )
+            conn.execute(query)
+            conn.close()
+            return True  # 返回 True 表示插入成功
+        except SQLAlchemyError as e:
+            print(f"An error occurred while inserting user data: {str(e)}")
+            conn.close()
+            return False  # 返回 False 表示插入失败
+    return False  # 返回 False 表示连接数据库失败
+
 
 
 
@@ -232,7 +243,7 @@ def read_data():
 
 @app.route('/helloworld', methods=['GET'])
 def hello():  
-    return "ff"
+    return "kk"
     
 if __name__ == '__main__':
     app.run(debug=True)
