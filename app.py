@@ -78,7 +78,14 @@ def insert_user_to_database(user_profile):
             return f"An error occurred while inserting user data: {str(e)}"  
     return False  # 返回 False 表示连接数据库失败
 
-
+@app.route('/testConDB', methods=['GET'])
+def test_connect_to_database():
+    conn = connect_to_database()
+    if conn:
+        conn.close()
+        return jsonify({'message': 'Database connection successful'})
+    else:
+        return jsonify({'error': 'Failed to connect to the database'})
 
 
 @app.route('/getCode', methods=['GET'])
@@ -243,7 +250,7 @@ def read_data():
 
 @app.route('/helloworld', methods=['GET'])
 def hello():  
-    return "adwwwa"
+    return "22"
     
 if __name__ == '__main__':
     app.run(debug=True)
