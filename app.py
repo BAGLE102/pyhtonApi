@@ -101,10 +101,12 @@ def get_data():
             if check_user_exists(user_profile['user_id']):
                 # 如果用户存在，则从数据库中获取用户数据
                 user_data = get_user_data_from_database(user_profile['user_id'])
+                return "user already in"
             else:
                 # 如果用户不存在，则将用户数据插入到数据库中
                 insert_user_to_database(user_profile)
                 user_data = user_profile
+                return "no user"
 
             # 直接返回用户数据
             return jsonify(user_data)
