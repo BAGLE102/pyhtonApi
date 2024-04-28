@@ -75,7 +75,7 @@ def insert_user_to_database(user_profile):
         except SQLAlchemyError as e:
             print(f"An error occurred while inserting user data: {str(e)}")
             conn.close()
-            return False  # 返回 False 表示插入失败
+            return f"An error occurred while inserting user data: {str(e)}"  
     return False  # 返回 False 表示连接数据库失败
 
 
@@ -115,8 +115,7 @@ def get_data():
                 return "user already in"
             else:
                 # 如果用户不存在，则将用户数据插入到数据库中
-                if insert_user_to_database(user_profile) == False:
-                    return "sql err"
+                return insert_user_to_database(user_profile)
                 user_data = user_profile
                 return "no user"
 
@@ -244,7 +243,7 @@ def read_data():
 
 @app.route('/helloworld', methods=['GET'])
 def hello():  
-    return "ada"
+    return "adwwwa"
     
 if __name__ == '__main__':
     app.run(debug=True)
