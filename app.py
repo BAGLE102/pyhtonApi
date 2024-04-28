@@ -115,7 +115,8 @@ def get_data():
                 return "user already in"
             else:
                 # 如果用户不存在，则将用户数据插入到数据库中
-                insert_user_to_database(user_profile)
+                if insert_user_to_database(user_profile) == False:
+                    return "sql err"
                 user_data = user_profile
                 return "no user"
 
@@ -243,7 +244,7 @@ def read_data():
 
 @app.route('/helloworld', methods=['GET'])
 def hello():  
-    return "kk"
+    return "ada"
     
 if __name__ == '__main__':
     app.run(debug=True)
