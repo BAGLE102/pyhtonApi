@@ -112,10 +112,11 @@ def get_data():
             response_json = response.json()
             access_token = response_json.get('access_token')
             
-            # 获取用户的个人资料信息
-            user_profile = get_user_profile(access_token)
+            
+            #user_profile = get_user_profile(access_token)
             
             # 检查用户是否存在于数据库中
+            '''
             if check_user_exists(user_profile['user_id']):
                 # 如果用户存在，则从数据库中获取用户数据
                 user_data = get_user_data_from_database(user_profile['user_id'])
@@ -127,6 +128,7 @@ def get_data():
                 return "no user"
 
             # 直接返回用户数据
+            '''
             return jsonify(user_data)
         else:
             print(f'Error: {response.status_code}, {response.text}')
