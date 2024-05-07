@@ -113,7 +113,7 @@ def get_data():
             access_token = response_json.get('access_token')
             
             
-            #user_profile = get_user_profile(access_token)
+            user_profile = get_user_profile(access_token)
             
             # 检查用户是否存在于数据库中
             '''
