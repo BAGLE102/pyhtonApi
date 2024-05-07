@@ -114,6 +114,7 @@ def get_data():
             
             
             user_profile = get_user_profile(access_token)
+            user_data = user_profile
             
             # 检查用户是否存在于数据库中
             '''
