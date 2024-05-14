@@ -254,7 +254,7 @@ def read_data():
 @app.route('/helloworld', methods=['GET'])
 def hello():  
     response = jsonify({"message": "你媽死了"})
-    response.headers.add('Custom-Header', 'CustomHeaderValue')
+    response.headers.add('Access-Control-Allow-Origin', '*')
     return response
     
 if __name__ == '__main__':
