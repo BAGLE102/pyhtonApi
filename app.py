@@ -253,7 +253,7 @@ def read_data():
 
 @app.route('/helloworld', methods=['GET'])
 def hello():  
-    return "22"
+    return "你媽死了"
     
 if __name__ == '__main__':
     app.run(debug=True)
