@@ -100,7 +100,7 @@ def get_data():
     data = {
         'grant_type': 'authorization_code',
         'code': param1,
-        'redirect_uri': 'https://pyhtonapi.onrender.com/getCode',
+        'redirect_uri': 'http://210.240.202.114/LineLogin',
         'client_id': '2004230225',
         'client_secret': 'a6fad92e499be2a30bd6a9bb5d9f99f3'
     }
