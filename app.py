@@ -130,8 +130,10 @@ def get_data():
 
             # 直接返回用户数据
             '''
-            user_data.headers.add('Access-Control-Allow-Origin', '*')
-            return jsonify(user_data)
+            respon = jsonify(user_data)
+            respon.headers.add('Access-Control-Allow-Origin', '*')
+            
+            return respon
         else:
             print(f'Error: {response.status_code}, {response.text}')
             return jsonify({'error': 'Failed to get access token'}), 500
