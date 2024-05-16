@@ -130,6 +130,7 @@ def get_data():
 
             # 直接返回用户数据
             '''
+            user_data.headers.add('Access-Control-Allow-Origin', '*')
             return jsonify(user_data)
         else:
             print(f'Error: {response.status_code}, {response.text}')
