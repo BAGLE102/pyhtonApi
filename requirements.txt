@@ -33,7 +33,6 @@ packaging==23.2
 paho-mqtt==1.6.1
 pandas==2.1.4
 protobuf==4.21.12
-psycopg2==2.9.9
 pycparser==2.21
 pydantic==2.5.3
 pydantic_core==2.14.6
