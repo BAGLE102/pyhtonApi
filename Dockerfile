@@ -21,7 +21,7 @@ COPY . .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 暴露应用运行的端口，例如 8000
-EXPOSE 8000
+EXPOSE 5000
 
 # 设置环境变量，如果需要
 ENV PYTHONUNBUFFERED=1
