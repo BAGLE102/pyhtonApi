@@ -1,33 +1,33 @@
-# 使用官方 Python 镜像作为基础镜像
+# 使用官方 Python 鏡像作為基礎鏡像
 FROM python:3.9-slim
 
-# 设置工作目录
+# 設定工作目錄
 WORKDIR /app
 
-# 安装必要的系统包和 ODBC 驱动程序
+# 安裝必要的系統包和 ODBC 驅動程式
 RUN apt-get update && \
-    apt-get install -y gcc g++ unixodbc unixodbc-dev libpq-dev curl && \
-    rm -rf /var/lib/apt/lists/*
+     apt-get install -y gcc g++ unixodbc unixodbc-dev libpq-dev curl && \
+     rm -rf /var/lib/apt/lists/*
 
-# 安装 PostgreSQL ODBC 驱动
+# 安裝 PostgreSQL ODBC 驅動
 RUN apt-get update && \
-    apt-get install -y odbc-postgresql && \
-    rm -rf /var/lib/apt/lists/*
+     apt-get install -y odbc-postgresql && \
+     rm -rf /var/lib/apt/lists/*
 
-# 将当前目录中的所有文件复制到工作目录中
+# 將目前目錄中的所有檔案複製到工作目錄中
 COPY . .
 
-# 查看 requirements.txt 文件内容
+# 查看 requirements.txt 檔案內容
 RUN cat requirements.txt
 
-# 安装 Python 依赖项
+# 安裝 Python 依賴項
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 暴露应用运行的端口，例如 5000
+# 暴露應用程式運行的端口，例如 5000
 EXPOSE 5000
 
-# 设置环境变量，如果需要
+# 設定環境變量，如果需要
 ENV PYTHONUNBUFFERED=1
 
-# 使用 gunicorn 启动应用程序
+# 使用 gunicorn 啟動應用程式
 CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
