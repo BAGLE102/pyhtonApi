@@ -19,7 +19,7 @@ def get_conn_str():
     'db': 'Trash',  
     }
 
-    return f"DRIVER=ODBC Driver 17 for SQL Server;SERVER={param['srv']},{param['pno']};DATABASE={param['db']};UID={param['uid']};PWD={param['pwd']}"
+    return f"DRIVER=ODBC Driver 17 for SQL Server;SERVER=210.240.202.114\\NHU-1200487-,{param['pno']};DATABASE={param['db']};UID={param['uid']};PWD={param['pwd']}"
 
 # 连接数据库
 def connect_to_database():
