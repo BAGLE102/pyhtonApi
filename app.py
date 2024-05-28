@@ -12,20 +12,20 @@ app = Flask(__name__)
 # 数据库连接字符串
 def get_conn_str():
     param = {
-        'uid': "sa",
-        'pwd': "ji3ao6u.3au/6y4",
-        'srv': "210.240.202.114",
-        'pno': 1443,
-        'db': 'Trash',  
+    'uid': "sa",
+    'pwd': "ji3ao6u.3au/6y4",
+    'srv': "210.240.202.114",
+    'pno': 1443,
+    'db': 'Trash',  
     }
 
-    return f"mssql+pyodbc://{param['uid']}:{param['pwd']}@{param['srv']}:{param['pno']}/{param['db']}?driver=ODBC Driver 17 for SQL Server"
+    return f"DRIVER=ODBC Driver 17 for SQL Server;SERVER={param['srv']},{param['pno']};DATABASE={param['db']};UID={param['uid']};PWD={param['pwd']}"
 
 # 连接数据库
 def connect_to_database():
     try:
-        engine = create_engine(get_conn_str())
-        return engine.connect()
+        engine = pyodbc.connect(get_conn_str())
+        return engine
     except Exception as e:
         print(f"An error occurred: {str(e)}")
         return None
