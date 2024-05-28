@@ -83,9 +83,12 @@ def test_connect_to_database():
     conn = connect_to_database()
     if conn:
         conn.close()
-        return jsonify({'message': 'Database connection successful'})
+        response = jsonify({'message': 'Database connection successful'})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
     else:
-        return jsonify({'error': 'Failed to connect to the database'})
+        response = jsonify({'error': 'Failed to connect to the database'})
+        return response
 
 
 @app.route('/getCode', methods=['GET'])
