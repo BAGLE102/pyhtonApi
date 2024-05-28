@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import pyodbc
+from pyodbc import Error as ODBCError
 from sqlalchemy import create_engine
 from sqlalchemy import text
 import pandas as pd
@@ -80,14 +81,19 @@ def insert_user_to_database(user_profile):
 
 @app.route('/testConDB', methods=['GET'])
 def test_connect_to_database():
-    conn = connect_to_database()
-    if conn:
-        conn.close()
-        response = jsonify({'message': 'Database connection successful'})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
-    else:
-        response = jsonify({'error': 'Failed to connect to the database'})
+    try:
+        conn = connect_to_database()
+        if conn:
+            conn.close()
+            response = jsonify({'message': 'Database connection successful'})
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            return response
+        else:
+            response = jsonify({'error': 'Failed to connect to the database'})
+            return response
+    except ODBCError as e:
+        error_message = str(e)
+        response = jsonify({'error': 'Failed to connect to the database', 'details': error_message})
         return response
 
 
