@@ -6,13 +6,14 @@ WORKDIR /app
 
 # 安装必要的系统包和 ODBC 驱动程序
 RUN apt-get update && \
-    apt-get install -y gcc g++ unixodbc unixodbc-dev curl apt-transport-https && \
+    apt-get install -y gcc g++ unixodbc unixodbc-dev curl apt-transport-https gnupg && \
     curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     curl https://packages.microsoft.com/config/debian/$(lsb_release -rs)/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
     apt-get update && \
     ACCEPT_EULA=Y apt-get install -y msodbcsql17 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
 
 # 将当前目录中的所有文件复制到工作目录中
 COPY . .
