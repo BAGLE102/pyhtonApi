@@ -1,18 +1,24 @@
 # 使用官方 Python 镜像作为基础镜像
-FROM python:3.9-slim
+FROM python:3.9-slim-buster
 
 # 设置工作目录
 WORKDIR /app
 
-# 安装必要的系统包和 ODBC 驱动程序
+
+
 RUN apt-get update && \
-    apt-get install -y gcc g++ unixodbc unixodbc-dev curl apt-transport-https gnupg && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        unixodbc-dev \
+        curl \
+        gnupg2 && \
+    apt-get clean && \
     curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
-    curl https://packages.microsoft.com/config/debian/$(lsb_release -rs)/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
+    curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
     apt-get update && \
     ACCEPT_EULA=Y apt-get install -y msodbcsql17 && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get clean
+
 
 
 # 将当前目录中的所有文件复制到工作目录中
