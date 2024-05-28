@@ -6,12 +6,12 @@ WORKDIR /app
 
 # 安裝必要的系統包和 ODBC 驅動程式
 RUN apt-get update && \
-     apt-get install -y gcc g++ unixodbc unixodbc-dev libpq-dev curl && \
-     rm -rf /var/lib/apt/lists/*
-
-# 安裝 PostgreSQL ODBC 驅動
-RUN apt-get update && \
-     apt-get install -y odbc-postgresql && \
+     apt-get install -y gcc g++ unixodbc unixodbc-dev curl apt-transport-https && \
+     curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+     curl https://packages.microsoft.com/config/debian/$(lsb_release -rs)/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
+     apt-get update && \
+     ACCEPT_EULA=Y apt-get install -y msodbcsql17 && \
+     apt-get clean && \
      rm -rf /var/lib/apt/lists/*
 
 # 將目前目錄中的所有檔案複製到工作目錄中
